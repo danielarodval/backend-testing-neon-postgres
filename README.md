@@ -8,9 +8,14 @@ Testing the deployment of a Neon Postgres backend with FastAPI webhooks to log d
 
 Add a GIF, image, or link to a live demo. Visuals grab attention.
 
-## Installation
+## Deployment Process
 
-Step-by-step instructions to get the project running.
+- [Singular Neon Postgres Database](./neon-solo-test)
+    - description
+- [Testing Neon Postgres with Fast API](./neon-fastapi-test)
+    - description
+- [Drafting the Actual Deployment](./actual-use-case)
+    - description
 
 ## Usage
 
