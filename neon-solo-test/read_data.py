@@ -10,10 +10,10 @@ try:
     with psycopg.connect(conn_string) as conn:
         print("Connected to the database successfully!")
 
-        with conn.cursor() as cursor:
+        with conn.cursor() as cur:
             # fetch all records from the test_table
-            cursor.execute("SELECT * FROM test_table;")
-            records = cursor.fetchall()
+            cur.execute("SELECT * FROM test_table;")
+            records = cur.fetchall()
             print("Fetched records from test_table:")
 
             # print each record
