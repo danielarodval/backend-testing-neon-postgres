@@ -1,0 +1,12 @@
+fastapi
+fastapi[standard]
+uvicorn
+sqlalchemy
+python-dotenv
+pydantic
+pydantic-settings
+httpx
+psycopg[binary]
+psycopg2-binary
+asyncpg
+greenlet
