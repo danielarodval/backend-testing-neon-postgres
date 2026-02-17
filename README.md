@@ -11,9 +11,12 @@ Add a GIF, image, or link to a live demo. Visuals grab attention.
 ## Deployment Process
 
 - [Singular Neon Postgres Database](./neon-solo-test)
-    - description
+    - Iterated through the tutorial on the Neon documentation to test the creation and understand the various sub-component scripts and requirements needed to rollout a table and update items on the online version of Neon Postgres. 
+    - In doing so there are a slew of limitations found based around resources and free subscription limitations.
+        - As such in the next stage/iteration with integrating Fast API I will begin doing research tangentially on docker container instances for a local implementation of Neon Postgres rather than relying on the cloud based implementation.
 - [Testing Neon Postgres with Fast API](./neon-fastapi-test)
-    - description
+    - Commenced with the creation of the database models still leveraging the cloud instance for testing, namely focused on FastAPI and Neon interoperability.
+    
 - [Drafting the Actual Deployment](./actual-use-case)
     - description
 
