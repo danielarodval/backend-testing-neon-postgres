@@ -78,25 +78,74 @@ async def github_webhook(
     return {"status": "success", "event_id": webhook_event.id}
 
 def verify_signature(body, signature):
-    secret = settings.WEBHOOK_SECRET.encode()
-    computed_signature = 'sha256=' + hmac.new(secret, body, hashlib.sha256).hexdigest()
-    return hmac.compare_digest(computed_signature, signature)
+    if not signature:
+        return False
+
+    # The signature from GitHub starts with 'sha256='
+    if not signature.startswith("sha256="):
+        return False
+
+    # Remove the 'sha256=' prefix
+    signature = signature[7:]
+
+    # Calculate the HMAC SHA256 signature using our webhook secret
+    secret = settings.webhook_secret.encode()
+    expected_signature = hmac.new(secret, body, hashlib.sha256).hexdigest()
+
+    # Compare the calculated signature with the one from GitHub
+    return hmac.compare_digest(expected_signature, signature)
 
 async def process_webhook_event(event_id, db):
-    # Fetch the event from the database
+    # Fetch the webhook event from the database
     result = await db.execute(select(WebhookEvent).where(WebhookEvent.id == event_id))
-    event = result.scalar_one_or_none()
+    event = result.scalars().first()
 
-    if event is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Webhook event not found"
-        )
-    
-    # Implement your processing logic here (e.g., trigger CI/CD, send notifications, etc.)
-    print(f"Processing webhook event: {event}")
+    if not event:
+        return
 
-    # Mark the event as processed
-    event.processed = True
-    await db.commit()
-    
+    try:
+        # Process different event types
+        if event.event_type == "push":
+            await process_push_event(event)
+        elif event.event_type == "pull_request":
+            await process_pull_request_event(event)
+        elif event.event_type == "issues":
+            await process_issue_event(event)
+        # Add more event types as needed
+
+        # Mark the event as processed
+        event.processed = True
+        await db.commit()
+
+    except Exception as e:
+        print(f"Error processing webhook event {event_id}: {e}")
+
+async def process_push_event(event):
+    """Process a GitHub push event."""
+    payload = event.payload
+    repo_name = payload.get("repository", {}).get("full_name")
+    ref = payload.get("ref")
+    commits = payload.get("commits", [])
+
+    print(f"Push to {repo_name} on {ref} with {len(commits)} commits")
+    # Handle the push event based on the commits
+
+async def process_pull_request_event(event):
+    """Process a GitHub pull request event."""
+    payload = event.payload
+    action = payload.get("action")
+    pr_number = payload.get("number")
+    repo_name = payload.get("repository", {}).get("full_name")
+
+    print(f"Pull request #{pr_number} {action} in {repo_name}")
+    # Handle the pull request based on the action (opened, closed, etc.)
+
+async def process_issue_event(event):
+    """Process a GitHub issue event."""
+    payload = event.payload
+    action = payload.get("action")
+    issue_number = payload.get("issue", {}).get("number")
+    repo_name = payload.get("repository", {}).get("full_name")
+
+    print(f"Issue #{issue_number} {action} in {repo_name}")
+    # Handle the issue based on the action (opened, closed, etc.)

@@ -2,7 +2,7 @@ import ssl
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.orm import sessionmaker, declarative_base
 from app.config import settings
-from urlib.parse import urlparse
+from urllib.parse import urlparse
 
 # Create an asynchronous engine using the DATABASE_URL from settings
 ssl_context = ssl.create_default_context()
@@ -17,8 +17,11 @@ db_host = parsed_url.hostname
 db_port = parsed_url.port
 db_name = parsed_url.path[1:]
 
-# Construct the async database URL
-ASYNC_DATABASE_URL = f"postgresql+asyncpg://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}?sslmode=require&channel_binding=require"
+# Build host (include port only when present) to avoid 'None' literal
+host_part = f"{db_host}:{db_port}" if db_port else db_host
+
+# Construct the async database URL (no query params — SSL passed via connect_args)
+ASYNC_DATABASE_URL = f"postgresql+asyncpg://{db_user}:{db_password}@{host_part}/{db_name}"
 
 # Create the async engine with SSL context
 engine = create_async_engine(
