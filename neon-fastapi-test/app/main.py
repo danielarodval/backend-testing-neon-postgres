@@ -88,8 +88,13 @@ def verify_signature(body, signature):
     # Remove the 'sha256=' prefix
     signature = signature[7:]
 
+    # Retrieve the webhook secret from settings (Pydantic field is WEBHOOK_SECRET)
+    secret_value = getattr(settings, "WEBHOOK_SECRET", None)
+    if not secret_value:
+        return False
+
     # Calculate the HMAC SHA256 signature using our webhook secret
-    secret = settings.webhook_secret.encode()
+    secret = secret_value.encode()
     expected_signature = hmac.new(secret, body, hashlib.sha256).hexdigest()
 
     # Compare the calculated signature with the one from GitHub

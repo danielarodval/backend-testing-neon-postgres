@@ -16,7 +16,8 @@ Add a GIF, image, or link to a live demo. Visuals grab attention.
         - As such in the next stage/iteration with integrating Fast API I will begin doing research tangentially on docker container instances for a local implementation of Neon Postgres rather than relying on the cloud based implementation.
 - [Testing Neon Postgres with Fast API](./neon-fastapi-test)
     - Commenced with the creation of the database models still leveraging the cloud instance for testing, namely focused on FastAPI and Neon interoperability.
-    
+    - Built using the webhooks guide that Neon has on their site, it was created specifically centered around GitHub webhooks with an ngrok exposed proxy layer, though in testing, I used the standard FastAPI interface, and forced calls via the test cases.
+
 - [Drafting the Actual Deployment](./actual-use-case)
     - description
 
