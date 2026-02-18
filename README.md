@@ -25,6 +25,65 @@ Add a GIF, image, or link to a live demo. Visuals grab attention.
 
 Show how to run it or use it. Include example commands or screenshots.
 
+## Neon setup (what was done)
+
+- Neon organization: `org-lingering-night-08521348`
+- Neon project used for testing: `still-block-95385845`
+- A Neon Postgres connection string was retrieved and stored locally in the service `.env` files (do not commit secrets).
+
+Key files updated to integrate Neon and webhook testing:
+
+- [neon-fastapi-test/app/database.py](neon-fastapi-test/app/database.py) — builds the async engine from `DATABASE_URL`, avoids inserting a literal `None` port when absent, and passes SSL via `connect_args`.
+- [neon-fastapi-test/app/main.py](neon-fastapi-test/app/main.py) — webhook receiver: safely reads `WEBHOOK_SECRET` from settings, verifies GitHub `X-Hub-Signature-256`, and persists `WebhookEvent` rows.
+- [neon-solo-test/delete_data.py](neon-solo-test/delete_data.py) — added validation for `CONNECTION_STRING` env var and clearer error if missing.
+
+## Local run & test (FastAPI webhook receiver)
+
+1. Create and activate your virtual environment and install requirements (see each folder's `requirements.txt`).
+
+2. Add a `.env` in `neon-fastapi-test/` with:
+
+```
+DATABASE_URL=<your Neon DATABASE_URL goes here>
+WEBHOOK_SECRET=<your webhook secret>
+```
+
+3. Start the app:
+
+```bash
+cd neon-fastapi-test
+source .venv/bin/activate
+uvicorn app.main:app --reload
+```
+
+4. Open the interactive docs at: `http://127.0.0.1:8000/docs` to inspect endpoints and use Try It Out.
+
+5. Example curl test — the signature must be computed over the exact request body bytes using your `WEBHOOK_SECRET`:
+
+```bash
+payload='{"repository":{"full_name":"me/repo"},"ref":"refs/heads/main","commits":[] }'
+sig=$(printf '%s' "$payload" | openssl dgst -sha256 -hmac "$WEBHOOK_SECRET" -binary | xxd -p -c 256)
+curl -X POST 'http://127.0.0.1:8000/webhooks/github' \
+    -H 'Content-Type: application/json' \
+    -H "X-GitHub-Event: push" \
+    -H "X-GitHub-Delivery: test-delivery" \
+    -H "X-Hub-Signature-256: sha256=$sig" \
+    -d "$payload"
+```
+
+6. Verify persisted events with:
+
+```bash
+curl http://127.0.0.1:8000/webhooks/events
+```
+
+## Notes & recommendations
+
+- Never commit `.env` files with secrets or the full Neon connection string to version control.
+- If you need easier local testing, consider adding a development-only bypass (for example an `X-DEV-BYPASS` header that short-circuits signature validation) guarded by a config flag — do not enable this in production.
+- The Neon connection string was used with SQLAlchemy async engine (`asyncpg`) — SSL is passed via `connect_args` rather than query params to avoid `asyncpg` errors.
+
+
 ## Features
 
 List key features so users know what to expect.
