@@ -4,9 +4,9 @@
 
 Testing the deployment of a Neon Postgres backend with FastAPI webhooks to log data from a local server via a Tailscale proxy. Containerized using Docker to package Postgres and Fast API.
 
-## Demo
+## Current Overview
 
-Add a GIF, image, or link to a live demo. Visuals grab attention.
+![Architecture Diagram](./assets/whiteboard.svg)
 
 ## Deployment Process
 
